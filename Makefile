@@ -10,12 +10,13 @@ BASE?=			/cdrom/usr/freebsd-dist
 KERNCONF?=		GENERIC
 MFSROOT_FREE_INODES?=	10%
 MFSROOT_FREE_BLOCKS?=	10%
-MFSROOT_MAXSIZE?=	100m
+MFSROOT_MAXSIZE?=	104m
+ROOTPW?=mfsroot
 
 # If you want to build your own kernel and make you own world, you need to set
 # -DCUSTOM or CUSTOM=1
 #
-# To make buildworld use 
+# To make buildworld use
 # -DCUSTOM -DBUILDWORLD or CUSTOM=1 BUILDWORLD=1
 #
 # To make buildkernel use
@@ -34,6 +35,7 @@ SCRIPTSDIR?=		scripts
 PACKAGESDIR?=		packages
 CUSTOMFILESDIR?=	customfiles
 TOOLSDIR?=		tools
+SCHEMADIR?=		schema
 PRUNELIST?=		${TOOLSDIR}/prunelist
 KERN_EXCLUDE?=		${TOOLSDIR}/kern_exclude
 PKG_STATIC?=		/usr/local/sbin/pkg-static
@@ -382,6 +384,9 @@ ${WRKDIR}/.config_done:
 		${INSTALL} -d -m 0700 ${_DESTDIR}/root/.ssh; \
 		${INSTALL} ${CFGDIR}/authorized_keys ${_DESTDIR}/root/.ssh/; \
 	fi
+	${_v}${MKDIR} ${_DESTDIR}/usr/share/mfsbsd/schema
+	${_v}${INSTALL} ${SCHEMADIR}/default.zfs ${_DESTDIR}/usr/share/mfsbsd/schema
+	${_v}${INSTALL} ${SCHEMADIR}/legacy.zfs ${_DESTDIR}/usr/share/mfsbsd/schema
 	${_v}${MKDIR} ${_DESTDIR}/root/bin
 	${_v}${INSTALL} ${TOOLSDIR}/zfsinstall ${_DESTDIR}/root/bin
 	${_v}${INSTALL} ${TOOLSDIR}/destroygeom ${_DESTDIR}/root/bin
@@ -433,8 +438,8 @@ compress-usr: install prune config genkeys customfiles boot packages ${WRKDIR}/.
 ${WRKDIR}/.compress-usr_done:
 .if !defined(ROOTHACK)
 	@echo -n "Compressing usr ..."
-	${_v}${TAR} -c -J -C ${_DESTDIR} -f ${_DESTDIR}/.usr.tar.xz usr 
-	${_v}${RM} -rf ${_DESTDIR}/usr && ${MKDIR} ${_DESTDIR}/usr 
+	${_v}${TAR} -c -J -C ${_DESTDIR} -f ${_DESTDIR}/.usr.tar.xz usr
+	${_v}${RM} -rf ${_DESTDIR}/usr && ${MKDIR} ${_DESTDIR}/usr
 .else
 	@echo -n "Compressing root ..."
 	${_v}${TAR} -c -C ${_ROOTDIR} -f - rw | \

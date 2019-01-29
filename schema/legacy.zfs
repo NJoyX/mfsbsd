@@ -1,0 +1,16 @@
+tmp                   -o mountpoint=legacy  -o exec=on -o setuid=off
+
+usr                   -o mountpoint=legacy
+usr/home
+usr/src               -o exec=off -o setuid=off
+usr/obj
+usr/ports             -o mountpoint=legacy -o setuid=off
+usr/ports/distfiles   -o exec=off -o setuid=off
+usr/ports/packages    -o exec=off -o setuid=off
+
+var                   -o mountpoint=legacy
+var/audit             -o exec=off -o setuid=off
+var/crash             -o exec=off -o setuid=off
+var/log               -o exec=off -o setuid=off
+var/mail              -o atime=on -o exec=off -o setuid=off
+var/tmp               -o exec=on -o setuid=off

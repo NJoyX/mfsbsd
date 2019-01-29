@@ -52,6 +52,7 @@ CURDIR!=${PWD}
 WRKDIR?=${CURDIR}/tmp
 FILESDIR=${CURDIR}/files
 TOOLSDIR=${CURDIR}/../tools
+SCHEMADIR=${CURDIR}/../schema
 #
 #
 DOFS=${TOOLSDIR}/doFS.sh
@@ -70,7 +71,7 @@ VERB=
 .if !defined(ARCH)
 TARGET!=	${SYSCTL} -n hw.machine_arch
 .else
-TARGET=		${ARCH} 
+TARGET=		${ARCH}
 .endif
 
 .if !defined(RELEASE)
@@ -157,7 +158,7 @@ ${WRKDIR}/.localtar_done:
 	${_v}${TOUCH} ${WRKDIR}/.localtar_done
 	${_v}echo " done"
 .endif
-	
+
 install: installbase basetar localtar
 
 config: install ${WRKDIR}/.config_done
@@ -183,6 +184,9 @@ ${WRKDIR}/.config_done:
 		${INSTALL} -m 0644 ${CFGDIR}/${FILE}.sample ${_ROOTDIR}/root/${FILE}; \
 	fi
 .endfor
+	${_v}${MKDIR} ${_ROOTDIR}/usr/share/mfsbsd/schema
+	${_v}${INSTALL} ${SCHEMADIR}/default.zfs ${_ROOTDIR}/usr/share/mfsbsd/schema
+	${_v}${INSTALL} ${SCHEMADIR}/legacy.zfs ${_ROOTDIR}/usr/share/mfsbsd/schema
 	${_v}${INSTALL} ${TOOLSDIR}/zfsinstall ${_ROOTDIR}/root/bin
 	${_v}${INSTALL} ${TOOLSDIR}/destroygeom ${_ROOTDIR}/root/bin
 	${_v}echo "/dev/md0 / ufs rw 0 0" > ${_ROOTDIR}/etc/fstab
@@ -292,6 +296,6 @@ ${TARFILE}:
 	${_v}echo " done"
 	${_v}${LS} -l ${TARFILE}
 
-clean: 
+clean:
 	${_v}if [ -d ${WRKDIR} ]; then ${CHFLAGS} -R noschg ${WRKDIR}; fi
 	${_v}cd ${WRKDIR} && ${RM} -rf mfs mnt disk dist trees .*_done
