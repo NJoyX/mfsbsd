@@ -5,10 +5,10 @@
         "vagrant_cloud_tag_name": "freebsd",
         "cloud_token": "{{ env `ATLAS_TOKEN` }}",
         "version": "12.0",
-        "iso_url": "https://github.com/NJoyX/mfsbsd/releases/download/2.4-pre/mfsbsd-12.0-RELEASE-amd64.iso",
-        "iso_checksum": "bb1ec709aaa35626910a5a977f6bb0cb638ddce7b6a91e707b0d2b8d9ad733c4",
+        "iso_url": "https://github.com/NJoyX/mfsbsd/releases/download/v.2.4-p2/mfsbsd-12.0-RELEASE-p2-amd64.iso",
+        "iso_checksum": "e5eda4ee4d4c44dde8df86ad290475ecd2874ecb41fb0173b82591ec58aca053",
         "iso_checksum_type": "sha256",
-        "boot_wait": "45s",
+        "boot_wait": "50s",
         "disk_size": "16384",
         "http_directory": "packer/http",
         "ssh_username": "root",
@@ -16,7 +16,7 @@
         "ssh_wait_timeout": "1000s",
         "shutdown_command": "shutdown -p now",
         "headless": "true",
-        "vm_memory": "2048"
+        "vm_memory": "3072"
     },
     "builders": [
         {
