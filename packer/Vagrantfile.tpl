@@ -3,6 +3,10 @@
 
 Vagrant.configure(2) do |config|
   config.vm.box = "njoyx_dev/FreeBSD"
-  config.ssh.shell = "/bin/csh"
-  config.vm.synced_folder ".", "/vagrant", type: "rsync", rsync__exclude: [".git/", "Vagrantfile", ".gitignore"]
+
+  config.vm.box_check_update = true
+  config.ssh.forward_agent = true
+  config.ssh.keep_alive = true
+
+  config.vm.synced_folder ".", "/vagrant", disabled: true
 end
