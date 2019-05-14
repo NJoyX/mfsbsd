@@ -1,6 +1,6 @@
 # mfsBSD installation (deployment) instructions
 
-Copyright (c) 2018 Martin Matuska <mm at FreeBSD.org>
+Copyright (c) 2019 Martin Matuska <mm at FreeBSD.org>
 
 ## Build
 For customized build please see the [BUILD](./BUILD.md) file

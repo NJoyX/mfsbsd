@@ -1,14 +1,14 @@
 # mfsBSD building instructions
 
-Copyright (c) 2018 Martin Matuska <mm at FreeBSD.org>
+Copyright (c) 2019 Martin Matuska <mm at FreeBSD.org>
 
 ## Configuration
 Read hints in the sample configuration files in the conf/ directory, copy
-these files to files without .sample ending and make modifications to suit 
+these files to files without .sample ending and make modifications to suit
 your needs.
 
 ## Additional packages and files
-If you want any packages installed, copy the .tbz files that should be 
+If you want any packages installed, copy the .tbz files that should be
 automatically installed into the packages/ directory.
 
 Add any additional files into the customfiles/ directory. These will be copied
@@ -23,7 +23,7 @@ You may choose to build from a FreeBSD distribution (e.g. CDROM), or by
 using make buildworld / buildkernel from your own world and kernel
 configuration.
 
-To use a distribution (e.g. FreeBSD cdrom), you need access to it 
+To use a distribution (e.g. FreeBSD cdrom), you need access to it
 (e.g. a mounted FreeBSD ISO via mdconfig) and use BASE=/path/to/distribution
 
 To use your own but already built world and kernel, use CUSTOM=1
@@ -32,7 +32,7 @@ use BUILDWORLD=1 and BUILDKERNEL=1
 
 ## Creating images
 
-You may create three types of output: disc image for use by dd(1), 
+You may create three types of output: disc image for use by dd(1),
 ISO image or a simple .tar.gz file
 
 ##Examples
