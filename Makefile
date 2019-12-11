@@ -654,7 +654,10 @@ clean-pkgcache:
 	${_v}${RM} -rf ${WRKDIR}/cache
 
 clean:
-	${_v}if [ -d ${WRKDIR} ]; then ${CHFLAGS} -R noschg ${WRKDIR}; fi
-	${_v}cd ${WRKDIR} && ${RM} -rf mfs mnt disk dist trees .*_done
+	${_v}if [ -d ${WRKDIR} ]; then \
+	${CHFLAGS} -R noschg ${WRKDIR} && \
+	cd ${WRKDIR} && \
+	${RM} -rf mfs mnt disk dist trees .*_done; \
+	fi
 
 clean-all: clean clean-roothack clean-pkgcache
