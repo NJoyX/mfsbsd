@@ -2,7 +2,7 @@
 
 Copyright (c) 2019 Martin Matuska <mm at FreeBSD.org>
 
-Version 2.3.1
+Version 2.3.2
 
 ## Description
 

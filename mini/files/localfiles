@@ -7,5 +7,10 @@ bin/ipmitool
 bin/rsync
 bin/nano
 bin/tmux
+lib/libevent-2.1.so*
+lib/libiconv.so.*
+lib/libintl.so.*
+lib/libreadline.so.*
+lib/libutf8proc.so.*
 sbin/dropbear
 sbin/dmidecode
