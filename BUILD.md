@@ -79,3 +79,11 @@ ISO image or a simple .tar.gz file
   make gce BASE=/cdrom/11.0-RELEASE
   make gce CUSTOM=1 BUILDWORLD=1 BUILDKERNEL=1
   ```
+
+7. Vagrant disc image
+
+  ```bash
+  make vagrant BASE=/cdrom/usr/freebsd-dist
+  make vagrant BASE=/cdrom/10.2-RELEASE
+  make vagrant CUSTOM=1 BUILDWORLD=1 BUILDKERNEL=1
+  ```
