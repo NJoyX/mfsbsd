@@ -12,6 +12,7 @@ MFSROOT_FREE_INODES?=	10%
 MFSROOT_FREE_BLOCKS?=	10%
 MFSROOT_MAXSIZE?=	100m
 ROOTPW?=mfsroot
+VAGRANT_PACKAGES?=		python37 python3 python
 
 # If you want to build your own kernel and make you own world, you need to set
 # -DCUSTOM or CUSTOM=1
@@ -44,6 +45,7 @@ PKG_STATIC?=		/usr/local/sbin/pkg-static
 #
 MKDIR?=		/bin/mkdir -p
 CHOWN?=		/usr/sbin/chown
+CHMOD?=		/bin/chmod
 CAT?=		/bin/cat
 PWD?=		/bin/pwd
 TAR?=		/usr/bin/tar
@@ -110,11 +112,11 @@ IMAGE_PREFIX?=	mfsbsd
 IMAGE_PREFIX?=	mfsbsd-se
 .endif
 
-IMAGE?=		${IMAGE_PREFIX}-${RELEASE}-${TARGET}.img
-ISOIMAGE?=	${IMAGE_PREFIX}-${RELEASE}-${TARGET}.iso
-TARFILE?=	${IMAGE_PREFIX}-${RELEASE}-${TARGET}.tar
-GCEFILE?=	${IMAGE_PREFIX}-${RELEASE}-${TARGET}.tar.gz
-_DISTDIR=	${WRKDIR}/dist/${RELEASE}-${TARGET}
+IMAGE?=				${IMAGE_PREFIX}-${RELEASE}-${TARGET}.img
+ISOIMAGE?=			${IMAGE_PREFIX}-${RELEASE}-${TARGET}.iso
+TARFILE?=			${IMAGE_PREFIX}-${RELEASE}-${TARGET}.tar
+GCEFILE?=			${IMAGE_PREFIX}-${RELEASE}-${TARGET}.tar.gz
+_DISTDIR=			${WRKDIR}/dist/${RELEASE}-${TARGET}
 
 .if !defined(DEBUG)
 EXCLUDE=	--exclude *.symbols
@@ -334,6 +336,16 @@ ${WRKDIR}/.packages_done:
 	fi
 	${_v}${TOUCH} ${WRKDIR}/.packages_done
 
+vagrant-packages: install prune ${WRKDIR}/.vagrant_packages_done
+${WRKDIR}/.vagrant_packages_done:
+	@echo "Fetching vagrant packages (sudo bash ${VAGRANT_PACKAGES}) ..."
+	${_v}env ASSUME_ALWAYS_YES=YES ${PKG} bootstrap > /dev/null 2> /dev/null
+	${_v}${PKG} fetch -Udy -o ${PACKAGESDIR} sudo bash ${VAGRANT_PACKAGES}
+	${_v}${FIND} ${PACKAGESDIR} -name "*.t?z" -exec mv {} ${PACKAGESDIR} \;
+	${_v}${RMDIR} ${PACKAGESDIR}/All
+	${_v}${TOUCH} ${WRKDIR}/.vagrant_packages_done
+	@echo " done";
+
 config: install ${WRKDIR}/.config_done
 ${WRKDIR}/.config_done:
 	@echo -n "Installing configuration scripts and files ..."
@@ -412,6 +424,23 @@ ${WRKDIR}/.config_done:
 	@echo "Missing ${CFGDIR}/hosts.sample" && exit 1
 .endif
 	${_v}${TOUCH} ${WRKDIR}/.config_done
+	@echo " done"
+
+vagrant-config: config vagrant-packages ${WRKDIR}/.vagrant_config_done
+${WRKDIR}/.vagrant_config_done:
+	@echo -n "Configuring vagrant user and access ..."
+	${_v}echo "vagrant" | ${PW} -V ${_DESTDIR}/etc useradd vagrant -h 0 -s /usr/local/bin/bash -G wheel -c "vagrant"
+	${_v}${MKDIR} ${_DESTDIR}/usr/local/etc/sudoers.d
+	${_v}echo "vagrant ALL=(ALL) NOPASSWD: ALL" > ${_DESTDIR}/usr/local/etc/sudoers.d/vagrant
+	${_v}echo "Defaults:vagrant !requiretty" >> ${_DESTDIR}/usr/local/etc/sudoers.d/vagrant
+	${_v}${CHMOD} 0440 ${_DESTDIR}/usr/local/etc/sudoers.d/vagrant
+	${_v}test -f ${_DESTDIR}/usr/local/etc/sudoers || echo "#includedir /usr/local/etc/sudoers.d" > ${_DESTDIR}/usr/local/etc/sudoers
+	${_v}${CHMOD} 0440 ${_DESTDIR}/usr/local/etc/sudoers
+	${_v}${MKDIR} -pm 700 ${_DESTDIR}/home/vagrant/.ssh
+	${_v}fetch -am -o ${_DESTDIR}/home/vagrant/.ssh/authorized_keys 'https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub'
+	${_v}${CHMOD} 0600 ${_DESTDIR}/home/vagrant/.ssh/authorized_keys
+	${_v}${CHOWN} -R vagrant:wheel ${_DESTDIR}/home/vagrant
+	${_v}${TOUCH} ${WRKDIR}/.vagrant_config_done
 	@echo " done"
 
 genkeys: config ${WRKDIR}/.genkeys_done
@@ -584,6 +613,9 @@ ${TARFILE}:
 		-exec ${TAR} -r -f ${.CURDIR}/${TARFILE} {} \;
 	@echo " done"
 	${_v}${LS} -l ${TARFILE}
+
+vagrant: install prune config vagrant-config genkeys customfiles boot compress-usr mfsroot fbsddist
+	${_v}$(MAKE) $(MAKEOVERRIDES) IMAGE=${IMAGE_PREFIX}-${RELEASE}-vagrant-${TARGET}.img
 
 clean-roothack:
 	${_v}${RM} -rf ${WRKDIR}/roothack
