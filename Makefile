@@ -116,7 +116,6 @@ IMAGE?=				${IMAGE_PREFIX}-${RELEASE}-${TARGET}.img
 ISOIMAGE?=			${IMAGE_PREFIX}-${RELEASE}-${TARGET}.iso
 TARFILE?=			${IMAGE_PREFIX}-${RELEASE}-${TARGET}.tar
 GCEFILE?=			${IMAGE_PREFIX}-${RELEASE}-${TARGET}.tar.gz
-VAGRANT_IMAGE?=		${IMAGE_PREFIX}-${RELEASE}-vagrant-${TARGET}.img
 _DISTDIR=			${WRKDIR}/dist/${RELEASE}-${TARGET}
 
 .if !defined(DEBUG)
@@ -339,9 +338,9 @@ ${WRKDIR}/.packages_done:
 
 vagrant-packages: install prune ${WRKDIR}/.vagrant_packages_done
 ${WRKDIR}/.vagrant_packages_done:
-	@echo "Fetching vagrant packages (ca_root_nss sudo bash ${VAGRANT_PACKAGES}) ..."
+	@echo "Fetching vagrant packages (sudo bash ${VAGRANT_PACKAGES}) ..."
 	${_v}env ASSUME_ALWAYS_YES=YES ${PKG} bootstrap > /dev/null 2> /dev/null
-	${_v}${PKG} fetch -Udy -o ${PACKAGESDIR} ca_root_nss sudo bash ${VAGRANT_PACKAGES}
+	${_v}${PKG} fetch -Udy -o ${PACKAGESDIR} sudo bash ${VAGRANT_PACKAGES}
 	${_v}${FIND} ${PACKAGESDIR} -name "*.t?z" -exec mv {} ${PACKAGESDIR} \;
 	${_v}${RMDIR} ${PACKAGESDIR}/All
 	${_v}${TOUCH} ${WRKDIR}/.vagrant_packages_done
@@ -435,6 +434,8 @@ ${WRKDIR}/.vagrant_config_done:
 	${_v}echo "vagrant ALL=(ALL) NOPASSWD: ALL" > ${_DESTDIR}/usr/local/etc/sudoers.d/vagrant
 	${_v}echo "Defaults:vagrant !requiretty" >> ${_DESTDIR}/usr/local/etc/sudoers.d/vagrant
 	${_v}${CHMOD} 0440 ${_DESTDIR}/usr/local/etc/sudoers.d/vagrant
+	${_v}test -f ${_DESTDIR}/usr/local/etc/sudoers || echo "#includedir /usr/local/etc/sudoers.d" > ${_DESTDIR}/usr/local/etc/sudoers
+	${_v}${CHMOD} 0440 ${_DESTDIR}/usr/local/etc/sudoers
 	${_v}${MKDIR} -pm 700 ${_DESTDIR}/home/vagrant/.ssh
 	${_v}fetch -am -o ${_DESTDIR}/home/vagrant/.ssh/authorized_keys 'https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub'
 	${_v}${CHMOD} 0600 ${_DESTDIR}/home/vagrant/.ssh/authorized_keys
@@ -613,9 +614,8 @@ ${TARFILE}:
 	@echo " done"
 	${_v}${LS} -l ${TARFILE}
 
-vagrant: install prune config vagrant-config genkeys customfiles boot compress-usr mfsroot fbsddist ${VAGRANT_IMAGE}
-${VAGRANT_IMAGE}:
-	${_v}$(MAKE) $(MAKEOVERRIDES) IMAGE=${VAGRANT_IMAGE}
+vagrant: install prune config vagrant-config genkeys customfiles boot compress-usr mfsroot fbsddist
+	${_v}$(MAKE) $(MAKEOVERRIDES) IMAGE=${IMAGE_PREFIX}-${RELEASE}-vagrant-${TARGET}.img
 
 clean-roothack:
 	${_v}${RM} -rf ${WRKDIR}/roothack
