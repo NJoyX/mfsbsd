@@ -4,7 +4,7 @@
 # mfsBSD ZFS pool and geom partition deleting
 #
 # Copyright (c) 2010-2011 Georges Discry <murmex at gathex.net>
-# Copyright (c) 2019 Martin Matuska <mm at FreeBSD.org>
+# Copyright (c) 2020 Martin Matuska <mm at FreeBSD.org>
 
 usage () {
 	echo "Usage: $0 [-h] -d geom [-d geom ...] [-p zpool ...]"

@@ -1,0 +1,37 @@
+FREEBSD_BASE_FILES= base.txz kernel.txz
+
+vagrant-freebsd-base: ${WRKDIR}/.vagrant_freebsd_base_done
+${WRKDIR}/.vagrant_freebsd_base_done:
+	${_v}f=; for FILE in ${FREEBSD_BASE_FILES}; do 					\
+		 				 if [ -f ${BASE}/$$FILE ]; then 			\
+						 f="$$f ${BASE}/$$FILE";					\
+		 				 fi; done;									\
+		 test -d ${_DESTDIR}/usr/freebsd-dist || 					\
+		 	mkdir -p ${_DESTDIR}/usr/freebsd-dist;					\
+		 ${CP} $$f ${_DESTDIR}/usr/freebsd-dist; unset f
+	${_v}${TOUCH} $@
+
+vagrant-packages: install prune ${WRKDIR}/.vagrant_packages_done
+${WRKDIR}/.vagrant_packages_done:
+	${_v}test -f ${TOOLSDIR}/packages || ${CAT} ${TOOLSDIR}/packages.sample ${TOOLSDIR}/packages.vagrant >> ${TOOLSDIR}/packages
+	${_v}${TOUCH} $@
+
+vagrant-config: config vagrant-packages ${WRKDIR}/.vagrant_config_done
+${WRKDIR}/.vagrant_config_done:
+	@echo -n "Configuring vagrant user and access ..."
+	${_v}echo "vagrant" | openssl passwd -6 -stdin | ${PW} -V ${_DESTDIR}/etc useradd vagrant -h 0 -s /usr/local/bin/bash -G wheel -c "vagrant"
+	${_v}${MKDIR} ${_DESTDIR}/usr/local/etc/sudoers.d
+	${_v}echo "vagrant ALL=(ALL) NOPASSWD: ALL" > ${_DESTDIR}/usr/local/etc/sudoers.d/vagrant
+	${_v}echo "Defaults:vagrant !requiretty" >> ${_DESTDIR}/usr/local/etc/sudoers.d/vagrant
+	${_v}${CHMOD} 0440 ${_DESTDIR}/usr/local/etc/sudoers.d/vagrant
+	${_v}test -f ${_DESTDIR}/usr/local/etc/sudoers || echo "#includedir /usr/local/etc/sudoers.d" > ${_DESTDIR}/usr/local/etc/sudoers
+	${_v}${CHMOD} 0440 ${_DESTDIR}/usr/local/etc/sudoers
+	${_v}${MKDIR} -pm 700 ${_DESTDIR}/home/vagrant/.ssh
+	${_v}fetch -am -o ${_DESTDIR}/home/vagrant/.ssh/authorized_keys 'https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub'
+	${_v}${CHMOD} 0600 ${_DESTDIR}/home/vagrant/.ssh/authorized_keys
+	${_v}${CHOWN} -R vagrant:wheel ${_DESTDIR}/home/vagrant
+	${_v}${TOUCH} $@
+	@echo " done"
+
+vagrant: install prune config vagrant-config genkeys vagrant-freebsd-base customfiles boot compress-usr mfsroot fbsddist
+	${_v}${MAKE} $(MAKEOVERRIDES) IMAGE=${IMAGE_PREFIX}-${RELEASE}-vagrant-${TARGET}.img
