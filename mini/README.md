@@ -1,6 +1,6 @@
 # mfsBSD-mini
 
-Copyright (c) 2019 Martin Matuska <mm at FreeBSD.org>
+Copyright (c) 2020 Martin Matuska <mm at FreeBSD.org>
 
 ## Description
 

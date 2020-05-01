@@ -1,8 +1,8 @@
 # mfsBSD
 
-Copyright (c) 2019 Martin Matuska <mm at FreeBSD.org>
+Copyright (c) 2020 Martin Matuska <mm at FreeBSD.org>
 
-Version 2.3.2
+Version 2.3.3
 
 ## Description
 
